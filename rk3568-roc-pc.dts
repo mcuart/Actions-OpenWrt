@@ -12,7 +12,7 @@
 #include "rk3568.dtsi"
 
 / {
-	model = "Firefly Station P2 20250919";
+	model = "mcuart Station P2 20261118";
 	compatible = "firefly,rk3568-roc-pc", "rockchip,rk3568";
 
 	aliases {
