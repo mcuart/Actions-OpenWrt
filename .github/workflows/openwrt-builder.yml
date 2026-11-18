@@ -31,12 +31,12 @@ jobs:
       uses: actions/checkout@main
 
     # ========== 第一个SSH：放在最开头，纯连通测试 ==========
-    - name: Debug shell - TEST SSH (EARLIEST)
-      uses: owenthereal/action-upterm@v2
-      with:
-        limit-access-to-actor: true
-        wait-timeout-minutes: 6
-        ssh-public-key: ${{ secrets.UPTERM_SSH_PUBLIC_KEY }}
+    #- name: Debug shell - TEST SSH (EARLIEST)
+    #  uses: owenthereal/action-upterm@v2
+    #  with:
+    #    limit-access-to-actor: true
+    #    wait-timeout-minutes: 6
+    #    ssh-public-key: ${{ secrets.UPTERM_SSH_PUBLIC_KEY }}
 
     - name: Initialization environment
       env:
@@ -93,12 +93,12 @@ jobs:
         fi
 
     # ========== 第二个SSH：正式menuconfig（插件齐全） ==========
-    - name: Debug shell - MENUCONFIG
-      uses: owenthereal/action-upterm@v2
-      with:
-        limit-access-to-actor: true
-        wait-timeout-minutes: 10
-        ssh-public-key: ${{ secrets.UPTERM_SSH_PUBLIC_KEY }}
+    #- name: Debug shell - MENUCONFIG
+    #  uses: owenthereal/action-upterm@v2
+    #  with:
+    #    limit-access-to-actor: true
+    #    wait-timeout-minutes: 10
+    #    ssh-public-key: ${{ secrets.UPTERM_SSH_PUBLIC_KEY }}
 
     - name: Download package
       id: package
