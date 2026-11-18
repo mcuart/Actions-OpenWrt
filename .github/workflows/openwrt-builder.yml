@@ -1,14 +1,8 @@
-#
 # https://github.com/P3TERX/Actions-OpenWrt
-#
 # File: .github/workflows/openwrt-bulder.yml
 # Description: Build OpenWrt using GitHub Actions
-#
 # Copyright (c) 2019-2024 P3TERX <https://p3terx.com>
-#
 # This is free software, licensed under the MIT License.
-# See /LICENSE for more information.
-#
 
 name: OpenWrt Builder
 
@@ -110,7 +104,6 @@ jobs:
       id: package
       run: |
         cd /workdir/openwrt
-        make defconfig
         make download -j8
         find dl -size -1024c -exec ls -l {} \;
         find dl -size -1024c -exec rm -f {} \;
@@ -125,6 +118,21 @@ jobs:
         grep '^CONFIG_TARGET.*DEVICE.*=y' .config | sed -r 's/.*DEVICE_(.*)=y/\1/' > DEVICE_NAME
         [ -s DEVICE_NAME ] && echo "DEVICE_NAME=_$(cat DEVICE_NAME)" >> $GITHUB_ENV
         echo "FILE_DATE=_$(date +"%Y%m%d%H%M")" >> $GITHUB_ENV
+
+    # 复制.config到固件输出目录，跟着固件一起打包、上传Release
+    - name: Copy .config to firmware output
+      if: steps.compile.outputs.status == 'success'
+      run: |
+        cd /workdir/openwrt
+        cp .config bin/targets/*/*/
+
+    # 单独一份config产物，可单独下载
+    - name: Upload .config separate artifact
+      uses: actions/upload-artifact@main
+      if: steps.compile.outputs.status == 'success'
+      with:
+        name: RK3568-config-backup${{ env.DEVICE_NAME }}${{ env.FILE_DATE }}
+        path: /workdir/openwrt/.config
 
     - name: Check space usage
       if: (!cancelled())
