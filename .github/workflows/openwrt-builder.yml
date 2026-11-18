@@ -40,7 +40,7 @@ jobs:
     - name: Setup tmate session
       uses: mxschmitt/action-tmate@v3
       with:
-        limit-access-to-actor: true # 推荐开启，限制只有触发者能访问
+        limit-access-to-actor: false # 推荐开启，限制只有触发者能访问
 
 
     - name: Initialization environment
@@ -101,7 +101,7 @@ jobs:
     - name: Setup tmate session
       uses: mxschmitt/action-tmate@v3
       with:
-        limit-access-to-actor: true # 推荐开启，限制只有触发者能访问
+        limit-access-to-actor: false # 推荐开启，限制只有触发者能访问
 
     - name: Download package
       id: package
