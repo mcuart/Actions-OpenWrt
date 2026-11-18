@@ -36,6 +36,13 @@ jobs:
     - name: Checkout
       uses: actions/checkout@main
 
+    # ========== 第一个SSH：放在最开头，纯连通测试 ==========
+    - name: Debug shell - TEST SSH (EARLIEST)
+      uses: owenthereal/action-upterm@v2
+      with:
+        limit-access-to-actor: true
+        wait-timeout-minutes: 6
+
     - name: Initialization environment
       env:
         DEBIAN_FRONTEND: noninteractive
@@ -60,18 +67,26 @@ jobs:
         git clone $REPO_URL -b $REPO_BRANCH openwrt
         ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
 
+    - name: Cache dl
+      uses: actions/cache@v4
+      with:
+        path: /workdir/openwrt/dl
+        key: openwrt-dl-${{ hashFiles('openwrt/.config') }}
+        restore-keys: |
+          openwrt-dl-
+
     - name: Load custom feeds
       run: |
-        [ -e $FEEDS_CONF ] && mv $FEEDS_CONF openwrt/feeds.conf.default
+        [ -e $FEEDS_CONF ] && mv $FEEDS_CONF /workdir/openwrt/feeds.conf.default
         chmod +x $DIY_P1_SH
-        cd openwrt
+        cd /workdir/openwrt
         $GITHUB_WORKSPACE/$DIY_P1_SH
 
     - name: Update feeds
-      run: cd openwrt && ./scripts/feeds update -a
+      run: cd /workdir/openwrt && ./scripts/feeds update -a
 
     - name: Install feeds
-      run: cd openwrt && ./scripts/feeds install -a
+      run: cd /workdir/openwrt && ./scripts/feeds install -a
 
     - name: Load custom configuration
       run: |
@@ -81,16 +96,18 @@ jobs:
         if [ -e "$CONFIG_FILE" ]; then
           mv "$CONFIG_FILE" /workdir/openwrt/.config
         fi
-    
-    - name: tmate debug
-      uses: mxschmitt/action-tmate@v3
+
+    # ========== 第二个SSH：正式menuconfig（插件齐全） ==========
+    - name: Debug shell - MENUCONFIG
+      uses: owenthereal/action-upterm@v2
       with:
         limit-access-to-actor: true
+        wait-timeout-minutes: 10
 
     - name: Download package
       id: package
       run: |
-        cd openwrt
+        cd /workdir/openwrt
         make defconfig
         make download -j8
         find dl -size -1024c -exec ls -l {} \;
@@ -99,7 +116,7 @@ jobs:
     - name: Compile the firmware
       id: compile
       run: |
-        cd openwrt
+        cd /workdir/openwrt
         echo -e "$(nproc) thread compile"
         make -j$(nproc) || make -j1 || make -j1 V=s
         echo "status=success" >> $GITHUB_OUTPUT
@@ -116,13 +133,13 @@ jobs:
       if: steps.compile.outputs.status == 'success' && env.UPLOAD_BIN_DIR == 'true'
       with:
         name: OpenWrt_bin${{ env.DEVICE_NAME }}${{ env.FILE_DATE }}
-        path: openwrt/bin
+        path: /workdir/openwrt/bin
 
     - name: Organize files
       id: organize
       if: env.UPLOAD_FIRMWARE == 'true' && !cancelled()
       run: |
-        cd openwrt/bin/targets/*/*
+        cd /workdir/openwrt/bin/targets/*/*
         rm -rf packages
         echo "FIRMWARE=$PWD" >> $GITHUB_ENV
         echo "status=success" >> $GITHUB_OUTPUT
@@ -140,7 +157,6 @@ jobs:
       run: |
         echo "release_tag=$(date +"%Y.%m.%d-%H%M")" >> $GITHUB_OUTPUT
         touch release.txt
-        [ ${UPLOAD_GOFILE} = true && ${{ steps.gofile.outputs.url }} ] && echo "🔗 [GoFile](${{ steps.gofile.outputs.url }})" >> release.txt
         echo "status=success" >> $GITHUB_OUTPUT
 
     - name: Upload firmware to release
