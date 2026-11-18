@@ -18,3 +18,6 @@
 
 # Modify hostname
 #sed -i 's/OpenWrt/P3TERX-Router/g' package/base-files/files/bin/config_generate
+
+cd openwrt
+cp ../rk3568-roc-pc.dts target/linux/rockchip/files/arch/arm64/boot/dts/rockchip/
