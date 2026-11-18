@@ -20,4 +20,4 @@
 #sed -i 's/OpenWrt/P3TERX-Router/g' package/base-files/files/bin/config_generate
 
 cd /workdir/openwrt
-cp $GITHUB_WORKSPACE/firefly_roc-rk3568-pc.dts target/linux/rockchip/files/arch/arm64/boot/dts/rockchip/
+cp $GITHUB_WORKSPACE/firefly_roc-rk3568-pc.dts target/linux/rockchip/files/arch/arm64/boot/dts/rockchip/rk3568-roc-pc.dts
