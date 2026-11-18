@@ -37,11 +37,11 @@ jobs:
       uses: actions/checkout@main
 
     # ========== 第一个SSH：放在最开头，纯连通测试 ==========
-    - name: Debug shell - TEST SSH (EARLIEST)
-      uses: owenthereal/action-upterm@v2
+    - name: Setup tmate session
+      uses: mxschmitt/action-tmate@v3
       with:
-        limit-access-to-actor: true
-        wait-timeout-minutes: 6
+        limit-access-to-actor: true # 推荐开启，限制只有触发者能访问
+
 
     - name: Initialization environment
       env:
@@ -98,11 +98,10 @@ jobs:
         fi
 
     # ========== 第二个SSH：正式menuconfig（插件齐全） ==========
-    - name: Debug shell - MENUCONFIG
-      uses: owenthereal/action-upterm@v2
+    - name: Setup tmate session
+      uses: mxschmitt/action-tmate@v3
       with:
-        limit-access-to-actor: true
-        wait-timeout-minutes: 10
+        limit-access-to-actor: true # 推荐开启，限制只有触发者能访问
 
     - name: Download package
       id: package
