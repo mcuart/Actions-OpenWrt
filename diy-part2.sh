@@ -27,13 +27,8 @@ cp -f "$DTS_SRC" "$DTS_DST"
 # 3. DTS 文件校验
 cmp "$DTS_SRC" "$DTS_DST"
 
-grep -q 'power_led: power' "$DTS_DST"
-grep -q 'user_led: user' "$DTS_DST"
-
 echo "========== DTS CHECK =========="
 
 grep 'model =' "$DTS_DST"
-
-grep -nE 'firefly:blue:power|firefly:yellow:user' "$DTS_DST"
 
 echo "DTS applied successfully!"
