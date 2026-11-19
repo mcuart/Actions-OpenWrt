@@ -1,23 +1,62 @@
+
 #!/bin/bash
 #
-# https://github.com/P3TERX/Actions-OpenWrt
-# File name: diy-part2.sh
-# Description: OpenWrt DIY script part 2 (After Update feeds)
-#
-# Copyright (c) 2019-2024 P3TERX <https://p3terx.com>
-#
-# This is free software, licensed under the MIT License.
-# See /LICENSE for more information.
+# OpenWrt DIY script part 2
 #
 
-# Modify default IP
-#sed -i 's/192.168.1.1/192.168.50.5/g' package/base-files/files/bin/config_generate
-
-# Modify default theme
-#sed -i 's/luci-theme-bootstrap/luci-theme-argon/g' feeds/luci/collections/luci/Makefile
-
-# Modify hostname
-#sed -i 's/OpenWrt/P3TERX-Router/g' package/base-files/files/bin/config_generate
+set -e
 
 cd /workdir/openwrt
-cp $GITHUB_WORKSPACE/rk3568-roc-pc.dts target/linux/rockchip/files/arch/arm64/boot/dts/rockchip/rk3568-roc-pc.dts
+
+PATCH_FILE="target/linux/rockchip/patches-6.12/100-rockchip-use-system-LED-for-OpenWrt.patch"
+
+echo "========== Fix ROC-PC LED patch conflict =========="
+
+python3 - "$PATCH_FILE" <<'PY'
+import sys
+from pathlib import Path
+
+patch = Path(sys.argv[1])
+
+start = "--- a/arch/arm64/boot/dts/rockchip/rk3568-roc-pc.dts"
+end = "--- a/arch/arm64/boot/dts/rockchip/rk3568-rock-3a.dts"
+
+content = patch.read_text()
+
+if start not in content:
+    raise SystemExit("ERROR: ROC-PC patch section not found")
+
+if end not in content:
+    raise SystemExit("ERROR: Next patch section not found")
+
+before, remainder = content.split(start, 1)
+_, after = remainder.split(end, 1)
+
+patch.write_text(before + end + after)
+
+print("Removed only rk3568-roc-pc patch section.")
+print("Other Rockchip device patches are preserved.")
+PY
+
+echo "========== Apply Custom DTS =========="
+
+DTS_SRC="$GITHUB_WORKSPACE/rk3568-roc-pc.dts"
+DTS_DIR="target/linux/rockchip/files/arch/arm64/boot/dts/rockchip"
+DTS_DST="$DTS_DIR/rk3568-roc-pc.dts"
+
+test -f "$DTS_SRC"
+
+mkdir -p "$DTS_DIR"
+
+cp -f "$DTS_SRC" "$DTS_DST"
+
+cmp -s "$DTS_SRC" "$DTS_DST"
+
+echo "========== DTS Verification =========="
+
+sha256sum "$DTS_SRC" "$DTS_DST"
+
+grep -n 'model =' "$DTS_DST"
+grep -n 'led-running' "$DTS_DST"
+
+echo "Custom DTS applied successfully!"
