@@ -5,7 +5,7 @@ cd /workdir/openwrt
 
 # 1. 替换 Rockchip 系统 LED 补丁
 PATCH_SRC="$GITHUB_WORKSPACE/100-rockchip-use-system-LED-for-OpenWrt.patch"
-PATCH_DST="target/linux/rockchip/patches-6.12/100-rockchip-use-system-LED-for-OpenWrt.patch"
+PATCH_DST="target/linux/rockchip/patches-6.18/100-rockchip-use-system-LED-for-OpenWrt.patch"
 
 if [ ! -f "$PATCH_SRC" ]; then
     echo "ERROR: Custom PATCH not found: $PATCH_SRC"
