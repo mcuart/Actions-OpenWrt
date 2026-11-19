@@ -3,13 +3,22 @@ set -e
 
 cd /workdir/openwrt
 
-# 1. 删除整个 Rockchip 系统 LED 补丁
-PATCH="target/linux/rockchip/patches-6.12/100-rockchip-use-system-LED-for-OpenWrt.patch"
+# 1. 替换 Rockchip 系统 LED 补丁
+PATCH_SRC="$GITHUB_WORKSPACE/100-rockchip-use-system-LED-for-OpenWrt.patch"
+PATCH_DST="target/linux/rockchip/patches-6.12/100-rockchip-use-system-LED-for-OpenWrt.patch"
 
-rm -f "$PATCH"
+if [ ! -f "$PATCH_SRC" ]; then
+    echo "ERROR: Custom PATCH not found: $PATCH_SRC"
+    exit 1
+fi
 
-echo "========== LED PATCH =========="
-echo "Rockchip LED patch removed"
+mkdir -p "$(dirname "$PATCH_DST")"
+
+cp -f "$PATCH_SRC" "$PATCH_DST"
+
+# PATCH 文件校验
+cmp "$DTS_SRC" "$DTS_DST"
+echo "========== CHECK PATCH =========="
 
 # 2. 复制自定义 DTS
 DTS_SRC="$GITHUB_WORKSPACE/rk3568-roc-pc.dts"
