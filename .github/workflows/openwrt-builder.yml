@@ -91,7 +91,10 @@ jobs:
         if [ -e "$CONFIG_FILE" ]; then
           mv "$CONFIG_FILE" /workdir/openwrt/.config
         fi
-
+        chmod +x $DIY_P2_SH
+        cd /workdir/openwrt
+        $GITHUB_WORKSPACE/$DIY_P2_SH
+        
     # ========== 第二个SSH：正式menuconfig（插件齐全） ==========
     #- name: Debug shell - MENUCONFIG
     #  uses: owenthereal/action-upterm@v2
