@@ -17,7 +17,7 @@ mkdir -p "$(dirname "$PATCH_DST")"
 cp -f "$PATCH_SRC" "$PATCH_DST"
 
 # PATCH 文件校验
-cmp "$DTS_SRC" "$DTS_DST"
+cmp "$PATCH_SRC" "$PATCH_DST"
 echo "========== CHECK PATCH =========="
 
 # 2. 复制自定义 DTS
